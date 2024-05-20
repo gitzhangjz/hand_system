@@ -1,0 +1,103 @@
+{% extends "./base.html" %}
+{% block title %}首页{% endblock %}
+{% block content %}
+{% load static %}
+<div id="log-container">
+    
+<div id="system_tile">
+    <div id="system_tile_text">手部康复脑机协同训练系统</div>
+</div>
+
+
+<div id="login-body">
+    <div id="login-title">
+        <div id="login-title-text">选择被试</div>
+    </div>
+    <div id="select-container">
+        {% if user_list %}
+        <form action="{% url 'app:setname' %}" method="post">
+            {% csrf_token %}
+            <select name="user" id="select-name">
+                {% for user in user_list %}
+                    {%if user.id == uid %}
+                        <option value="{{ user.id }}" selected>&nbsp;&nbsp;&nbsp;{{ user.username }}&#9;&nbsp;&nbsp;{{user.age}}</option>
+                    {%else%}
+                        <option value="{{ user.id }}">&nbsp;&nbsp;&nbsp;{{ user.username }}&#9;&nbsp;&nbsp;{{user.age}}</option>
+                    {%endif%}
+                {% endfor %}
+                
+            </select>
+        </form>
+        {% else %}
+        <p>没有用户</p>
+        {% endif %}
+    </div>
+    <div id="chose-and-newuser">
+        <button type="button" onclick="set_name()" class="button">选择被试</button>
+        <button type="button" onclick="show_dialog()" id="add_user_bt" class="button">新建用户</button>
+    </div>
+    
+
+    <dialog id="add-user-dialog">
+        <div id="regist">
+            <form id="add-user-form" action="{% url 'app:adduser' %}" method="post">
+                {% csrf_token %}
+                <input type="text" id="new_name" name="name" class="input-text" placeholder="请输入用户名"><br>
+                <input type="number" id="new_age" name="age" class="input-text" placeholder="请输入年龄"><br>
+                <div class="sex-input"> 
+                    <div class="radio"><input type="radio" name="sex" value="male">男</div>
+                    <div class="radio"><input type="radio" name="sex" id="f_sex" value="female">女</div>
+                </div>
+            </form>
+            <div id="dialog-buttons">
+                <button type="button" onclick="add_user()" id="add_user_bt" class="button">新建用户</button>
+                <button type="button" onclick="location.reload();" class="button">返回</button>
+
+            </div>
+        </div>
+    </dialog>
+</div>
+</div>
+
+
+<script>
+    function show_dialog() {
+        var dialog = document.getElementById("add-user-dialog");
+        dialog.showModal();
+    }
+    function set_name() {
+        name = document.getElementById("select-name").value;
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "{% url 'app:setname' %}", false);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {}
+        xhr.send("user="+name);
+        location.reload();
+    }
+    function get_name() {
+        var state_request = new XMLHttpRequest();
+        state_request.open("GET", "{% url 'app:setname' %}", false);
+        state_request.onreadystatechange = function() {}
+        state_request.send();
+        return state_request.responseText;
+    }
+    var cur_name = get_name();
+
+    function add_user() {
+        name = document.getElementById("new_name").value;
+        age = document.getElementById("new_age").value;
+        var sex = "male";
+        if(document.getElementById("f_sex").checked)
+            sex = "female"
+        console.log(name+age+sex)
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "{% url 'app:adduser' %}", false);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {}
+        xhr.send("name="+name+"&age="+age+"&sex="+sex);
+        // location.reload();
+    }
+</script>
+
+{% endblock %}
+

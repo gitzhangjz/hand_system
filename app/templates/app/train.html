@@ -1,0 +1,160 @@
+{% extends "./base.html" %}
+{% block title %}康复手套{% endblock %}
+{% block content %}
+    {% load static %}
+
+    <div id="train-config">
+        <div id="roll-times">
+            <form>
+                {% csrf_token %}
+
+                <input type="number" id="train_loop" class="input-text" placeholder="请输入采集轮数"><br>
+            </form>
+        </div>
+        <div style=" width: fit-content; padding-left: 20px; ">
+            <button type="button" onclick="start()" id="data_start_bt" class="button" style="width: 200px; ">采集训练数据</button>
+            <button type="button" onclick="train()" id="data_train_bt" class="button">训练模型</button>   
+        </div>
+        
+         
+    </div>
+    
+    <div id="train_play" class="play">  
+        <div class="play-title"> <div class="title">刺激展示（当前被试：{{user.username}}）</div> </div>
+    </div>
+    <br><br>  <br><br> <br><br>
+
+    <script>
+        function sleep(time) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve();
+                }, time);
+            });
+        }
+
+        function train() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "{% url 'app:train_model' %}", false);
+            // xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        show("训练准确率："+xhr.responseText);
+                    } else {
+                        reject(new Error(`Request failed with status: ${xhr.status}`));
+                    }
+                }
+            }
+            xhr.send();
+        }
+
+        function send_signal(signal) {
+            var url = "{% url 'app:state' %}";
+            url = url.replace("state", signal);
+            var request = new XMLHttpRequest();
+            request.open("GET", url);
+            request.onreadystatechange = function() { };
+            request.send();
+        }
+
+        // 播放视频
+        function play(path) {
+            var src ="{% static 'app/video/mov.mp4' %}"
+            document.getElementById("train_play").innerHTML = "<video id=\"mov\"> <source id=\"source\" src=\"{% static 'app/video/mov.mp4' %}\" type=\"video/mp4\"  > </video>";
+            var video = document.getElementById("mov");
+            var p = document.getElementById("play");
+            video.setAttribute('width', '650px')
+            video.setAttribute('height', '650px')
+            var s = document.getElementById("source");
+            s.setAttribute('src', src.replace('mov', path))
+            video.play();
+        }
+
+        // 显示文字
+        function show(text) {
+            document.getElementById("train_play").innerHTML = "<div id=\"text\">"+text+"</div>";
+        }
+
+        async function start() {
+            loop = document.getElementById("train_loop").value;
+            console.log(loop)
+            send_signal('getdata')
+            for(var t = 1; t <= Number(loop); ++t) {
+                for(var i=1; i<=30; i++) {
+                    console.log(i)
+                    var act = i%3;
+                    var act_text = "";
+                    if(act == 0) {
+                        act_text = "休息";
+                    }else if(act == 1) {
+                        act_text = "抓握";
+                    }else{
+                        act_text = "伸展";
+                    }
+                    
+                    send_label(String(act))
+                    show("准备想象下一个动作："+act_text);
+                    await sleep(3000);
+                    
+                    if(act == 0)
+                        play('relax_l');
+                    else if(act == 1)
+                        play('bend_l');
+                    else
+                        play('extend_l');
+                    await sleep(3000);
+
+                    show("休息");
+                    await sleep(2000);
+                }
+                save_data(t);
+            }
+
+        }
+        function save_data(t) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{% url 'app:savedata' %}", false);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {}
+            xhr.send("t="+t);
+        }
+        function send_label(label) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{% url 'app:setlabel' %}", false);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {}
+            xhr.send("label="+label);
+        }
+
+        function add_user() {
+            name = document.getElementById("new_name").value;
+            age = document.getElementById("new_age").value;
+            var sex = "male";
+            if(document.getElementById("f_sex").checked)
+                sex = "female"
+            // console.log(name+age+sex)
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{% url 'app:adduser' %}", false);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {}
+            xhr.send("name="+name+"&age="+age+"&sex="+sex);
+        }
+        function set_name() {
+            name = document.getElementById("select_train_name").value;
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{% url 'app:setname' %}", false);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {}
+            xhr.send("user="+name);
+            get_name();
+        }
+        function get_name() {
+            var state_request = new XMLHttpRequest();
+            state_request.open("GET", "{% url 'app:setname' %}", false);
+            state_request.onreadystatechange = function() {}
+            state_request.send();
+            document.getElementById("train_name").innerHTML = state_request.responseText;
+        }
+    </script>
+{% endblock %}

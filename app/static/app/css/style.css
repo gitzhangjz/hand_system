@@ -1,0 +1,260 @@
+body {
+    margin: 0 auto;
+    /* background-color :#2082fe; */
+    background-image:  url("../img/back.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    width: 100%;
+}
+
+#header {
+    background-color: hsl(0deg 0% 90%);
+    height: fit-content;
+    width: inherit;
+    display: flex;
+    border-radius: 0 0 15px 15px;
+    overflow: hidden;
+}
+
+#logo {
+    margin-left: 5%;
+    width: 470px;
+    /* background-color: black; */
+    float: left;
+}
+
+/* 导航栏菜单 */
+#menu-buttons {
+    width: 40vw;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-left: 50px;
+}
+
+.menu-button{
+    color: #235ba8;
+    font-size: 40px;
+    padding-bottom: 5px;
+}
+.menu-button a{
+    text-decoration: none;
+    color: var(--menu);
+}
+#regist {
+    font-size: 30px;
+    padding-bottom: 10px;
+}
+#log-container {
+    display: flex;
+    padding-top: 5vw;
+    flex-direction: column;
+    align-items: center;
+}
+#system_tile {
+    font-size: 60px;
+    color: #daecff;
+    margin-bottom: 90px;
+}
+#login-body {
+    width: 400px;
+    height: 260px;
+    /* border: 1px solid; */
+    border-radius: 15px;
+    overflow: hidden;
+    background-color: hsl(0deg 0% 90%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 30px;
+    justify-content: space-evenly;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+input {
+    border-radius: 15px;
+    height: 50px;
+    margin-bottom: 7px;
+    text-indent: 20px;
+}
+.radio {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: fit-content;
+}
+#add-user-form {
+    border-radius: 15px;
+}
+#add-user-dialog {
+    border-radius: 15px;
+    padding: 20px;
+}
+#select-name {
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    padding: 8px;
+    color: #333333;
+    width: 260px;
+    font-size: 30px;
+}
+.input-text {
+    font-size: 30px;
+}
+#all {
+    width: inherit;
+    height: fit-content;
+    margin-left: 10%;
+    display: flex;
+    margin-top: 40px;
+}
+.play {
+    width: fit-content;
+    height: fit-content;
+    position: relative;
+    /* border: 1px solid; */
+    border-radius: 15px; 
+    overflow: hidden;
+    background-color: #daecff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+}
+.play-title {
+    background-color :hsl(0deg 0% 90%);
+    
+}
+.title {
+    font-size: 30px;
+    color: #002c69;
+    font-weight: 600;
+    margin-left: auto;
+    margin-right: auto;
+    width: fit-content;
+}
+
+#buttons {
+    background-color :hsl(0deg 0% 90%);
+    display: flex;
+    padding: 10px;
+}
+
+.button {
+    flex: 1;
+    margin: 5px;
+    background-color: #676cff;
+    width: 120px;
+    height: fit-content;
+    border-radius: 15px;
+    border: none;
+    color: #ffffff;
+    text-align: center;
+    font-size: 25px;
+    font-weight: 600;
+    padding: 5px;
+}
+#info {
+    margin : 0 auto;
+    width: fit-content;
+}
+#train_play {
+    background-color: hsl(0, 0%, 81%);
+    width: 750px;
+    height: 750px;
+    margin: 0 auto;
+    margin-top: 10px;
+    /* border: 5px solid; */
+}
+#regist {
+    margin: 0 auto;
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.sex-input {
+    display: flex;
+    justify-content: space-around;
+}
+#draw {
+    width: 38vw;
+    height: 38vw;
+}
+#text {
+    /* padding: 10px; */
+    font-size: 60px;
+    /* margin: 0 auto; */
+    /* margin-top: 15%; */
+    padding-top: 15%;
+    padding-left: 10px;
+}
+#mov {
+    width: 35vw;
+    height: 35vw;
+    margin: 0 auto;
+    /* margin-top: 15%; */
+}
+
+#signal-container {
+    width: 40vw;
+    padding-left: 10%;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    
+}
+.chart-container {
+    background-color: #ffffff;
+    border: 1px solid;
+    border-radius: 15px; 
+    overflow: hidden;
+    width: 35vw;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+}
+.label {
+    font-size: 20px;
+    width: 2vw;
+    margin-left: 5px;
+    /* display: flex; */
+}
+.text-blank {
+    height: 2vw;
+}
+.signal-title-container {
+    width: 100%;
+    height: fit-content;
+    /* font-size: 30px; */
+    background-color: hsl(0deg 0% 90%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.charts {
+    display: flex;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+.signal {
+    width: 33vw;
+    padding-left: 8px;
+    /* height: 5vw; */
+}
+
+#acc-chart-container {
+    width: 35vw;
+}
+#user-info-container {
+    padding: 5px;
+    width: fit-content;
+    background-color: #ffffff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#train-config {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin: 30px;
+}

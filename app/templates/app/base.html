@@ -1,0 +1,33 @@
+<!-- 模版Base -->
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="UTF-8">
+
+    <!-- 禁止缓存 -->
+    <meta http-equiv="pragma" content="no-store">
+    <meta http-equiv="expires" content="Wed, 26, Feb 1997 08:21:57 GMT">
+    <meta http-equiv="content-type" content="no-store, must-revalidate">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'app/img/coin.jpg' %}" type="image/x-icon">
+    <script src="{% static 'app/js/chart.js' %}"></script>
+    <script src="{% static 'app/js/user_manage.js' %}"></script>
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+    <div id = 'header'>
+        <img src="{% static 'app/img/new_logo.png' %}", alt="logo", id="logo", style="transform: scale(0.7)";>
+        <div id = 'menu-buttons'>
+            <div class="menu-button"> <a href="{% url 'app:index'%}">首页</a></div> 
+            <div class="menu-button"> <a href="{% url 'app:glove'%}">手部康复</a> </div>
+            <div class="menu-button"> <a href="{% url 'app:train' %}">实验采集</a> </div>
+        </div>
+    </div>
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

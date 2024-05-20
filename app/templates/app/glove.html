@@ -1,0 +1,386 @@
+{% extends "./base.html" %}
+{% block title %}康复手套{% endblock %}
+{% block content %}
+    {% load static %}
+    <div id="all">
+            
+        <!-- 视频展示部分 -->
+        <div id="play" class="play">
+            <div class="play-title"> <div class="title">刺激展示（当前被试：{{user.username}}）</div> </div>
+            <div id="draw"></div>
+            <div id="buttons">
+                <!-- <button class="button" onclick="f()" id="start_bt">开始实验</button> -->
+                <button class="button" onclick="start()" id="start_bt">开始实验</button>
+                <button class="button" onclick="stop()" id="stop_bt">停止实验</button>
+            </div>  
+        </div>
+        
+        <!-- 脑肌电信号 -->
+        <div id="signal-container">
+            <div id="eeg-container" class="chart-container">
+                <div class="signal-title-container"> <div class="title">脑电信号</div> </div>
+
+                <div class="charts">
+                    <div class="label"><div class="text-blank"></div> C3</div>
+                    <div class="signal">
+                        <canvas id="eeg-channal1" height="35px"></canvas>
+                    </div>
+                </div>
+                <div class="charts">
+                    <div class="label"><div class="text-blank"></div> Cz</div>
+                    <div class="signal">
+                        <canvas id="eeg-channal2" height="35px"></canvas>
+                    </div>
+                </div>
+                <div class="charts">
+                    <div class="label"><div class="text-blank"></div> C4</div>
+                    <div class="signal">
+                        <canvas id="eeg-channal3" height="35px"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div id="emg-container" class="chart-container">
+                <div class="signal-title-container"> <div class="title">肌电信号</div> </div>
+
+                <div class="charts">
+                    <div class="label"><div class="text-blank"></div> S1</div>
+                    <div class="signal">
+                        <canvas id="eeg-channal4" height="35px"></canvas>
+                    </div>
+                </div>
+                <div class="charts">
+                    <div class="label"><div class="text-blank"></div> S2</div>
+                    <div class="signal">
+                        <canvas id="eeg-channal5" height="35px"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div id="user-info-container">
+                <!-- <div id="acc">
+                    {{user.username }} 历史平均准确率：{{acc}}
+                </div> -->
+                <div id="acc-chart-container">
+                    <canvas id="acc-chart" height="100px"></canvas>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+    
+    <script>
+        // 新建图表
+        function new_chart(id, len, color, acc=false) {
+            ctx = document.getElementById(id);
+            data = {
+            labels: Array.from({length: len}, (_, index) => index + 1),  
+            datasets: [{
+                // label: get_name()+'近10次测试准确率',
+                data: new Array(len).fill(0),
+                borderColor: color, // 设置线的颜色
+                pointRadius: 0,
+                tension: 0.1
+            }]
+            };
+            config = {
+                type: 'line', // 设置图表类型
+                data: data,
+                options : {
+                    // responsive: false,
+                    scales: {
+                        x: {display: false},
+                        y: {display: false}
+                    },
+                    animation: { // 取消动画效果
+                        duration: 0, // 设置动画持续时间为0毫秒
+                        animateRotate: false, // 禁用旋转动画效果
+                        animateScale: false // 禁用缩放动画效果
+                    },
+                    hover: {
+                        animationDuration: 0 // 悬停项目时动画的持续时间
+                    },
+                    responsiveAnimationDuration: 0, // 调整大小后的动画持续时间
+                    plugins: {
+                        legend: { display: false }, // 取消标题
+                        tooltip: { enabled: false }// 取消显示折点信息
+                    },
+                }
+            };
+            if(acc == true) {
+                config = {
+                    type: 'line', // 设置图表类型
+                    data: data,
+                    options : { 
+                        scales: { y: {min: 0, max: 1} }, 
+                        plugins: {
+                            legend: { display: false}, // 取消标题
+                            tooltip: { enabled: false },// 取消显示折点信息
+                                title :{
+                                display: true,
+                                text: get_name()+'近10次测试准确率',
+                                font:{ size: 30 }
+                            }
+                        },
+                        
+                    }
+                };
+            }
+            return new Chart(ctx, config);
+        }
+        
+        eeg_chart1 = new_chart('eeg-channal1',100, 'rgb(219, 161, 161)');
+        eeg_chart1_data = new Array(100).fill(0);
+        eeg_chart2 = new_chart('eeg-channal2',100, 'rgb(155, 202, 222)');
+        eeg_chart2_data = new Array(100).fill(0);
+        eeg_chart3 = new_chart('eeg-channal3',100, 'rgb(168, 202, 157)');
+        eeg_chart3_data = new Array(100).fill(0);
+        eeg_chart4 = new_chart('eeg-channal4',100, 'rgb(141, 130, 186)');
+        eeg_chart4_data = new Array(100).fill(0);
+        eeg_chart5 = new_chart('eeg-channal5',100, 'rgb(216, 206, 123)');
+        eeg_chart5_data = new Array(100).fill(0);
+
+        acc_chart = new_chart('acc-chart', 10, 'rgb(255, 185, 124)', true);
+        acc_chart_data = new Array(10).fill(0);
+        // 更新图表
+        async function update_chart(data) {
+            var data = JSON.parse(data);
+            eeg_chart1.data.datasets[0].data = data[0];
+            eeg_chart2.data.datasets[0].data = data[1];
+            eeg_chart3.data.datasets[0].data = data[2];
+            eeg_chart4.data.datasets[0].data = data[3];
+            eeg_chart5.data.datasets[0].data = data[4];
+            eeg_chart1.update();
+            eeg_chart2.update();
+            eeg_chart3.update();
+            eeg_chart4.update();
+            eeg_chart5.update();
+        }
+
+        // 获取数据并更新图表
+        async function getdata_and_update() {
+            // TODO: 在这里获取后台数据的代码
+            
+            // 使用 setInterval 设置定时器，每隔 0.5 秒执行一次获取数据的操作
+            setInterval(async () => {
+                try {
+                    // TODO: 在这里获取后台数据的代码
+                    var state_request = new XMLHttpRequest();
+                    state_request.open("GET", "{% url 'app:transfer_data' %}", false);
+                    state_request.onreadystatechange = function() {}
+                    state_request.send();
+                    data = state_request.responseText;
+                    // console.log(data)
+                    // 获取到的数据更新页面的图表
+                    // console.log(data)
+                    update_chart(data);
+                } catch (error) {
+                console.error("获取数据出错:", error);
+                }
+            }, 100);
+        }
+        getdata_and_update();
+
+        function update_acc_chart(data) {
+            var data = JSON.parse(data);
+            acc_chart.data.datasets[0].data = data["ten_acc"];
+            acc_chart.update();
+        }
+        update_acc_chart(get_data('get_ten_acc'));
+
+        var state = 'nostate';
+        var stop_flag = false;
+        show("欢迎使用手部康复系统!");
+        // 阻塞
+        // sleep 函数--Promise 版本
+        function sleep(time) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve();
+                }, time);
+            });
+        }
+
+        function send_signal(signal) {
+            var url = "{% url 'app:state' %}";
+            url = url.replace("state", signal);
+            var request = new XMLHttpRequest();
+            request.open("GET", url);
+            request.onreadystatechange = function() { };
+            request.send();
+        }
+        function send_data(x,data) {
+            var url = "{% url 'app:state' %}";
+            url = url.replace("state", x);
+            console.log(url)
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", url, false);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.onreadystatechange = function() {}
+            xhr.send(data);
+        }
+        function get_data(x) {
+            var url = "{% url 'app:state' %}";
+            url = url.replace("state", x);
+            var state_request = new XMLHttpRequest();
+            state_request.open("GET", url, false);
+            state_request.onreadystatechange = function() {}
+            state_request.send();
+            console.log(state_request.responseText)
+            return state_request.responseText;
+        }
+        async function stop() {
+            send_signal('stop')
+            stop_flag = true;
+            show("欢迎使用手部康复系统!");
+            document.getElementById("start_bt").disabled=false;
+        }
+
+        // 得到分类结果
+        async function get_result(label) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            resolve(xhr.responseText);
+                        } else {
+                            reject(new Error(`Request failed with status: ${xhr.status}`));
+                        }
+                    }
+                };
+                xhr.open("POST", "{% url 'app:result' %}");
+                xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xhr.send("label="+String(label));
+            });
+        }
+        
+        // 得到后端数据的状态
+        // function get_state()
+        // {
+        //     document.getElementById("state").innerHTML = state;
+        //     var state_request = new XMLHttpRequest();
+        //     state_request.open("GET", "{% url 'app:state' %}", false);
+        //     state_request.onreadystatechange = function() {}
+        //     state_request.send();
+        //     state = state_request.responseText;
+        //     document.getElementById("state").innerHTML = "state : "+state;
+        // }
+        
+        // 显示文字
+        function show(text) {
+            document.getElementById("draw").innerHTML = "<div id=\"text\">"+text+"</div>";
+        }
+
+        // 播放视频
+        function play(path) {
+            var src ="{% static 'app/video/mov.mp4' %}"
+            document.getElementById("draw").innerHTML = "\
+                <div id = \"video-container\">\
+                    <video id=\"mov\"> \
+                        <source id=\"source\" src=\"{% static 'app/video/mov.mp4' %}\" type=\"video/mp4\"  > \
+                    </video>\
+                <div>";
+            var video = document.getElementById("mov");
+            var p = document.getElementById("draw");
+            video.setAttribute('width', '650px')
+            video.setAttribute('height', '650px')
+            var s = document.getElementById("source");
+            s.setAttribute('src', src.replace('mov', path))
+            video.play();
+        }
+
+        // 开始实验
+        async function start() {
+            stop_flag = false
+            if(state == 'unlink') {
+                document.getElementById("result").innerHTML = "请先连接设备";
+                return;
+            }else{
+                send_signal('getdata')
+
+                document.getElementById("start_bt").disabled=true;
+                // document.getElementById("link_bt").disabled=true;
+                var i = 0;
+                var acc = 0;
+                for(i=0; i<10; i++) {
+                    send_signal('getdata')
+                    var rd = i+1;
+                    var act = rd%3;
+                    var act_text = "";
+                    if(act == 0) {
+                        act_text = "休息";
+                    }else if(act == 1) {
+                        act_text = "抓握";
+                    }else{
+                        act_text = "伸展";
+                    }
+
+                    if(stop_flag == true) break;
+                    
+                    show("准备想象下一个动作："+act_text);
+                    // document.getElementById("result").innerHTML = i;
+
+                    if(stop_flag == true) break;
+
+                    await sleep(3000);
+                    if(stop_flag == true) break;
+
+                    
+                    if(act == 0)
+                        play('relax_r');
+                    else if(act == 1)
+                        play('bend_r');
+                    else
+                        play('extend_r');
+
+                    if(stop_flag == true) break;
+
+                    await sleep(3000);
+                    if(stop_flag == true) break;
+
+                    show("请稍等...");
+                    if(stop_flag == true) break;
+
+                    var res = await get_result(act);
+                    // var res = await get_result(3);
+                    if(stop_flag == true) break;
+
+                    show('识别为：'+res);
+                    if(act_text == res) {
+                        acc += 1;
+                    }
+                    if(stop_flag == true) break;
+
+                    await sleep(3000);
+                }
+
+                if(i == 10) {
+                    show("实验结束<br>准确率为："+String(acc/10));
+                    send_data('update_acc', JSON.stringify({'acc':acc/10.0}));
+                }else
+                    show("欢迎使用手部康复系统!");
+                
+                stop_flag = false;
+            }
+        }
+        
+        // function set_name() {
+            // name = document.getElementById("select_name").value;
+            // var xhr = new XMLHttpRequest();
+            // xhr.open("POST", "{% url 'app:setname' %}", false);
+            // xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            // xhr.onreadystatechange = function() {}
+            // xhr.send("user="+name);
+            // get_name();
+        // }
+        function get_name() {
+            var state_request = new XMLHttpRequest();
+            state_request.open("GET", "{% url 'app:setname' %}", false);
+            state_request.onreadystatechange = function() {}
+            state_request.send();
+            return state_request.responseText;
+        }
+        // get_name()
+    </script>
+{% endblock %}
